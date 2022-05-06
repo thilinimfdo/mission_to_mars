@@ -10,7 +10,7 @@ import time
 def scrape_all():
     # Initiate headless driver for deployment
     executable_path = {'executable_path': ChromeDriverManager().install()}
-    browser = Browser('chrome', **executable_path, headless=False)
+    browser = Browser('chrome', **executable_path, headless=True)
 
     news_title, news_paragraph = mars_news(browser)
 
@@ -101,13 +101,12 @@ def mars_facts():
 
 def hemisphere(browser):
     # 1. Use browser to visit the URL 
-    url = 'https://marshemispheres.com/'
+    url = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
+    
     browser.visit(url)
 
     # 2. Create a list to hold the images and titles.
     hemisphere_image_urls = []
-    
-    time.sleep(10)
 
     # 3. Write code to retrieve the image urls and titles for each hemisphere.
     links = browser.find_by_css('a.product-item h3')
@@ -115,38 +114,19 @@ def hemisphere(browser):
     for index in range(len(links)):
         
         try:
-            print(index)
+            hemisphere = {}
             browser.find_by_css('a.product-item h3')[index].click()
-        
             sample_element = browser.links.find_by_text("Sample").first
             hemisphere["img_url"] = sample_element["href"]
-            print(sample_element["href"])
             hemisphere["title"] = browser.find_by_css('h2.title').text
             hemisphere_image_urls.append(hemisphere)
             browser.back()
         except Exception as e:
             print(e)
+        finally:
+            browser.visit(url)
         
     return hemisphere_image_urls
-
-def scrape_hemisphere(html_text):
-    
-    hemi_soup = soup(html_text, "html.parser")
-    
-    try:
-        title_element = hemi_soup.find("h2", class_="title").get_text()
-        sample_element = hemi_soup.find("a", text="Sample").get("href")
-    except AttributeError:
-        title_element = None
-        sample_element= None
-    
-    hemisphere_dictionary = {
-        "title" : title_element,
-        "img_url" : sample_element
-    }
-    
-    return hemisphere_dictionary
-                     
 
 if __name__ == "__main__":
 
